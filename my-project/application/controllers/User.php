@@ -103,8 +103,8 @@ class User extends CI_Controller
         $config['protocol'] = "smtp";
         $config['smtp_host'] = "ssl://smtp.gmail.com";
         $config['smtp_port'] = "465";
-        $config['smtp_user'] = "myusufh882@gmail.com"; //Jangan lupa ganti Email
-        $config['smtp_pass'] = "yusuflinux4321"; //Jangan lupa juga ganti Passwordnya
+        $config['smtp_user'] = ""; //Jangan lupa ganti Email
+        $config['smtp_pass'] = ""; //Jangan lupa juga ganti Passwordnya
         $config['charset'] = "utf-8";
         $config['mailtype'] = "html";
         $config['newline'] = "\r\n";
