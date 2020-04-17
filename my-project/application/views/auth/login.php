@@ -29,10 +29,11 @@
                                     <button type="submit" class="btn btn-warning btn-user btn-block">
                                         Login
                                     </button>
+<!--                                    <a href="<?= base_url('auth/registration'); ?>" class="btn btn-primary btn-user btn-block">Register</a>-->
                                 </form>
                                 <hr>
                                 <div class="text-center">
-                                    <a class="small" href="forgot-password.html">Forgot Password?</a>
+<!--                                    <a class="small" href="<?= base_url('auth/forgotpassword'); ?>">Forgot Password?</a>-->
                                 </div>
                                 <div class="copyright text-center my-auto">
                                     <span>

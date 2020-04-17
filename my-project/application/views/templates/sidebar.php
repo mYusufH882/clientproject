@@ -62,14 +62,6 @@
         </div>
     </li>
 
-
-    <li class="nav-item">
-        <a class="nav-link" href="<?= base_url('user/forgotpass'); ?>">
-            <i class="fas fa-unlock-alt"></i>
-            <span>Forgot Password</span></a>
-
-    </li>
-
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">
 

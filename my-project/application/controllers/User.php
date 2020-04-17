@@ -10,6 +10,10 @@ class User extends CI_Controller
         $this->load->model('mdataps');
         $this->load->model('mdatapd');
         $this->load->model('eventAk');
+        
+        if(!$this->session->userdata('email')) {
+            redirect('Auth');
+        }
     }
 
     ////////////////////////////////////// ADMIN //////////////////////////////////////////////////
@@ -103,8 +107,8 @@ class User extends CI_Controller
         $config['protocol'] = "smtp";
         $config['smtp_host'] = "ssl://smtp.gmail.com";
         $config['smtp_port'] = "465";
-        $config['smtp_user'] = ""; //Jangan lupa ganti Email
-        $config['smtp_pass'] = ""; //Jangan lupa juga ganti Passwordnya
+        $config['smtp_user'] = "myusufh882@gmail.com"; //Jangan lupa ganti Email
+        $config['smtp_pass'] = "yusuflinux4321"; //Jangan lupa juga ganti Passwordnya
         $config['charset'] = "utf-8";
         $config['mailtype'] = "html";
         $config['newline'] = "\r\n";
@@ -125,7 +129,7 @@ class User extends CI_Controller
             redirect('user/datapendaftaran');
         } else {
             //Tampilkan pesan error dari system
-            // die($this->email->print_debugger());
+//             die($this->email->print_debugger());
             
             //Tampilkan pesan error dengan teks
             die('Email tidak memiliki izin untuk mengakses akun Gmail anda !!!');
@@ -140,8 +144,8 @@ class User extends CI_Controller
 
         if($user) {
             $this->mdataps->accept_event($email);
-            //Tinggal ganti link url
-            redirect('user');
+            $this->email->subject('Akun Kehadiran Event');
+            $this->email->message('Selamat akun anda teraktivasi');
         } else {
             die('Gagal aktivasi kehadiran');
         }
@@ -322,14 +326,11 @@ class User extends CI_Controller
         $boardgame = $this->input->post('boardgame');
         $tanggal = $this->input->post('tanggal');
         $tempat = $this->input->post('tempat');
-        $notif = $this->db->query('SELECT *, datediff(tanggal, CURRENT_DATE()) AS selisih,
-        CASE WHEN datediff(tanggal, CURRENT_DATE()) <= 2 THEN "bentarlagi" ELSE "tunggu" END AS notif FROM event_ak WHERE status = 0')->result_array();
-        // die(print_r($notif));
+
         $data = array(
             'boardgame' => $boardgame,
             'tanggal' => $tanggal,
             'tempat' => $tempat,
-            'notif' => $notif[0]['notif']
         );
 
         $this->eventAk->tambah_dataak($data);
