@@ -17,9 +17,12 @@
                 <label>Tempat pelaksanaan</label>
                 <input type="text" id="tempat" name="tempat" class="form-control" required>
             </div>
+            <div class="form-group">
+                <label>Harga Tiket</label>
+                <input type="number" id="harga" name="harga" class="form-control" required>
+            </div>
 
-
-            <button type="submit" class="btn btn-primary">Save </button>
+            <button type="submit" class="btn btn-primary">Save</button>
 
         </form>
 

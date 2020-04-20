@@ -57,6 +57,23 @@
 <script>
     $(document).ready(function() {
         $('#table1').DataTable();
+
+        $('#evt').change(function(){    
+
+            var id=$(this).val();
+            
+            $.ajax({
+                type : "GET",
+                url  : "<?php echo base_url('user/eventtampil/')?>"+id,
+                dataType : "JSON",
+                data : {id: id},
+                cache:false,
+                success: function(data, harga_tiket){
+                    $('#tiket').val("Rp. " + data.harga_tiket);
+                }
+            });
+            return false;
+        });
     });
 </script>
 

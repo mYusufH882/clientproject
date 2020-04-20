@@ -29,8 +29,7 @@
                         <td><?php echo $p->no_telp; ?></td>
                         <td><?php echo $p->email_ps; ?></td>
                         <td><a href="<?= base_url(); ?>user/edit_data/<?= $p->id; ?>" class="badge badge-pill badge-primary">Edit</a>
-                            <a href="<?= base_url(); ?>user/hapusdata/<?= $p->id; ?>" class="badge badge-pill badge-danger">Delete</a>
-                            <span class="badge badge-warning">Menunggu Aktivasi</span>
+                            <a href="<?= base_url(); ?>user/hapusdatadaftar/<?= $p->id; ?>" class="badge badge-pill badge-danger">Delete</a>
                         </td>
                     </tr>
 

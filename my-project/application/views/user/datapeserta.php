@@ -31,6 +31,7 @@
                         <td><?php echo $p->email_ps; ?></td>
                         <td><a href="<?= base_url(); ?>user/edit_data/<?= $p->id; ?>" class="badge badge-pill badge-primary">Edit</a>
                             <a href="<?= base_url(); ?>user/hapusdata/<?= $p->id; ?>" class="badge badge-pill badge-danger">Delete</a>
+                            <a href="<?= base_url(); ?>user/rincian/<?= $p->id; ?>" class="badge badge-pill badge-info">Rincian</a>
                         </td>
                     </tr>
 

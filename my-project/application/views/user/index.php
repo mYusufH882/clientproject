@@ -1,9 +1,33 @@
 <!-- Begin Page Content -->
 <div class="container-fluid">
 
+  <?php echo $this->session->flashdata('message'); ?>
+
+  <?php 
+    $reminder = $this->eventAk->reminder(); 
+    if($reminder) {
+  ?>
+      <?php foreach($reminder as $rm): ?>
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          <strong><?= $rm['boardgame'] ?> akan diadakan <b><?= $rm['tanggal'] ?></b></strong>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      <?php endforeach; ?>
+      <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Event baru yang akan datang, </b></strong>
+        <a href="<?= base_url() ?>user/notif_event">Kirim notifikasi</a>
+        <strong> ke user yang telah terdaftar jadi peserta.</strong>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+  <?php } ?>
+
   <!-- Content Row -->
   <div class="row">
-
+  
     <!-- Earnings (Monthly) Card Example -->
     <div class="col-xl-3 col-md-6 mb-4">
       <div class="card border-left-primary shadow h-100 py-2">

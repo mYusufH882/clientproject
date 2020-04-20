@@ -7,13 +7,26 @@ class User extends CI_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('mdataps');
-        $this->load->model('mdatapd');
-        $this->load->model('eventAk');
         
         if(!$this->session->userdata('email')) {
             redirect('Auth');
         }
+
+        $this->load->model('mdataps');
+        $this->load->model('mdatapd');
+        $this->load->model('eventAk');
+
+        $config['protocol'] = "smtp";
+        $config['smtp_host'] = "ssl://smtp.gmail.com";
+        $config['smtp_port'] = "465";
+        $config['smtp_user'] = "@gmail.com"; //Jangan lupa ganti Email
+        $config['smtp_pass'] = ""; //Jangan lupa juga ganti Passwordnya
+        $config['charset'] = "utf-8";
+        $config['mailtype'] = "html";
+        $config['newline'] = "\r\n";
+        $this->load->library('email');
+        
+        $this->email->initialize($config);
     }
 
     ////////////////////////////////////// ADMIN //////////////////////////////////////////////////
@@ -36,6 +49,118 @@ class User extends CI_Controller
         $this->load->view('templates/footer');
     }
 
+    ////////////////////////////////////// Email Event //////////////////////////////////////////////////
+
+    public function notif_event()
+    {   
+        //Untuk email coba allow dulu email adminnya untuk proses autentikasi pengiriman dengan gmail.
+        $this->email->from('bandungdesign@gmail.com', 'BandungDesign');
+        
+        $peserta = $this->mdataps->tampil_peserta()->result();
+        foreach($peserta as $p) {
+            $em[] = $p->email_ps;
+            $to_email = implode(",", $em);
+        }
+
+        $this->email->to($to_email); //untuk mengirimkan notif ke user yang telah mengikuti event sebelumnya
+        $this->email->subject('Event Baru di BandungDesign');
+
+        $evreminder = $this->eventAk->reminder();
+        foreach($evreminder as $evr) {
+            $data[] = $evr['boardgame'];
+            $tgl[] = $evr['tanggal'];
+            $im = implode(" , ", $data);
+            $it = implode(" , ", $tgl);
+
+            $this->email->message('<p>Hallo kami dari BandungDesign akan mengonfirmasi anda dalam keikutsertaan event board game <b>'.$im.'</b> ini, <br/> Harap konfirmasi persetujuan kehadiran anda pada link ini : <a href="'.base_url().'user/event_baru">Saya akan Hadir!!!</a> event akan dimulai pada '.$it.'</p>');
+        }
+
+
+        //Cek pengiriman email
+        if ($this->email->send()) {
+
+            //Akun ditambahkan ke database
+            // $this->mdataps->tambah_data($data);
+
+            $this->session->set_flashdata('message','<div class="alert alert-success">
+                Email telah dikirim pada '.date('D-M-Y').' 
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>');
+            redirect('user');
+        } else {
+            //Tampilkan pesan error dari system
+            // die($this->email->print_debugger());
+            
+            //Tampilkan pesan error dengan teks
+            die('Email tidak memiliki izin untuk mengakses akun Gmail anda !!!');
+        }        
+    }
+
+    function daftar_event_lagi()
+    {
+        $evak = $this->input->post('eventak');
+        $harga = $this->input->post('harga');
+        $email = $this->input->post('email');
+        $nominal = $this->input->post('bayar');
+        $bukti = $_FILES['bukti']['name'];
+
+        if($bukti) {
+            $config['allowed_types'] = "jpg|png|jpeg";
+            $config['upload_path'] = FCPATH."foto_bukti/";
+            $config['max_size'] = 3042;
+        
+            $this->upload->initialize($config);
+            
+            if(!$this->upload->do_upload('bukti')) {
+                die($this->upload->display_errors());
+            } else {
+                $buktitrans = $this->upload->data('file_name');
+                $data = array(
+                    'id_peserta' => $email,
+                    'id_eventak' => $evak,
+                    'biaya_pendaftaran' => $nominal,
+                    'tgl_daftar' => date('Y-m-d H:i:s'),
+                    'foto_bukti' => $buktitrans
+                );
+        
+                $this->eventAk->ikut_event_lagi($data);
+                $this->session->set_flashdata('message', '<div class="alert alert-success">Pendaftaran Berhasil</div>');
+                redirect('user/event_baru');                
+            }            
+        } else {
+            $data = array(
+                'id_peserta' => $email,
+                'id_eventak' => $evak,
+                'biaya_pendaftaran' => $nominal,
+                'tgl_daftar' => date('Y-m-d H:i:s')
+            );
+    
+            $this->eventAk->ikut_event_lagi($data);
+            $this->session->set_flashdata('message', '<div class="alert alert-success">Pendaftaran Berhasil</div>');
+            redirect('user/event_baru');
+        }
+
+    
+
+    }
+
+    function event_baru()
+    {
+        $data['evtak'] = $this->eventAk->reminder();
+        $data['emps'] = $this->mdataps->tampil_peserta()->result_array();
+        
+        $this->load->view('user/formonline', $data);
+        $this->load->view('templates/footer');
+    }
+
+    function eventtampil($id)
+    {
+        $data = $this->eventAk->edit_dataak($id);
+        echo json_encode($data);
+    }
+
     ////////////////////////////////////// DATA PENDAFTARAN ///////////////////////////////////////////////////
 
     public function datapendaftaran()
@@ -52,6 +177,12 @@ class User extends CI_Controller
         $this->load->view('templates/footer');        
     }
 
+    public function hapusdatadaftar($id)
+    {
+        $this->mdataps->hapusdata($id);
+        redirect('user/datapendaftaran');
+    }
+
     ////////////////////////////////////// DATA PESERTA //////////////////////////////////////////////////
     public function datapeserta()
     {
@@ -60,12 +191,25 @@ class User extends CI_Controller
 
         $this->load->helper('url');
         $data['data'] = $this->mdataps->tampil_peserta();
-        $reminder = $this->eventAk->reminder();
 
         $this->load->view('templates/header', $data);
         $this->load->view('templates/sidebar', $data);
         $this->load->view('templates/topbar', $data);
         $this->load->view('user/datapeserta', $data);
+        $this->load->view('templates/footer');
+    }
+
+    public function rincian($id)
+    {
+        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
+
+        $data['data'] = $this->mdataps->rincian_data($id);
+        $data['evt'] = $this->mdataps->tampil_event($id)->result();
+
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/sidebar', $data);
+        $this->load->view('templates/topbar', $data);
+        $this->load->view('user/rincianpeserta', $data);
         $this->load->view('templates/footer');
     }
 
@@ -104,18 +248,6 @@ class User extends CI_Controller
             'tgl_disetujui' => $tglsetuju
         );
 
-        $config['protocol'] = "smtp";
-        $config['smtp_host'] = "ssl://smtp.gmail.com";
-        $config['smtp_port'] = "465";
-        $config['smtp_user'] = "myusufh882@gmail.com"; //Jangan lupa ganti Email
-        $config['smtp_pass'] = "yusuflinux4321"; //Jangan lupa juga ganti Passwordnya
-        $config['charset'] = "utf-8";
-        $config['mailtype'] = "html";
-        $config['newline'] = "\r\n";
-        $this->load->library('email');
-        
-        $this->email->initialize($config);
-
         //Untuk email coba allow dulu email adminnya untuk proses autentikasi pengiriman dengan gmail.
         $this->email->from('bandungdesign@gmail.com', 'BandungDesign');
         $this->email->to($email_ps); //untuk mengirimkan notif ke user sesuai inputan pada aplikasi web
@@ -129,7 +261,7 @@ class User extends CI_Controller
             redirect('user/datapendaftaran');
         } else {
             //Tampilkan pesan error dari system
-//             die($this->email->print_debugger());
+            // die($this->email->print_debugger());
             
             //Tampilkan pesan error dengan teks
             die('Email tidak memiliki izin untuk mengakses akun Gmail anda !!!');
@@ -144,8 +276,6 @@ class User extends CI_Controller
 
         if($user) {
             $this->mdataps->accept_event($email);
-            $this->email->subject('Akun Kehadiran Event');
-            $this->email->message('Selamat akun anda teraktivasi');
         } else {
             die('Gagal aktivasi kehadiran');
         }
