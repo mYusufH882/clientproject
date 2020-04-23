@@ -19,8 +19,8 @@ class User extends CI_Controller
         $config['protocol'] = "smtp";
         $config['smtp_host'] = "ssl://smtp.gmail.com";
         $config['smtp_port'] = "465";
-        $config['smtp_user'] = "@gmail.com"; //Jangan lupa ganti Email
-        $config['smtp_pass'] = ""; //Jangan lupa juga ganti Passwordnya
+        $config['smtp_user'] = "email@gmail.com"; //Jangan lupa ganti Email
+        $config['smtp_pass'] = "xxxxxxxxx"; //Jangan lupa juga ganti Passwordnya
         $config['charset'] = "utf-8";
         $config['mailtype'] = "html";
         $config['newline'] = "\r\n";
@@ -35,9 +35,9 @@ class User extends CI_Controller
     {
         $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
         $data['event_ter'] = $this->eventAk->tampil_event_ter_last()->row();
-        $data['all_peserta'] = $this->mdatapd->tampil_peserta_all()->row();
+        $data['all_peserta'] = $this->mdatapd->tampil_peserta_all()->row_array();
         $data['last_date'] = $this->eventAk->tampil_last_date()->row();
-        $data['last_money'] = $this->mdatapd->tampil_last_money()->row();
+        $data['last_money'] = $this->mdatapd->tampil_last_money()->row_array();
 
         $this->load->helper('url');
         $data['data'] = $this->eventAk->tampil_data_ak();
@@ -75,13 +75,8 @@ class User extends CI_Controller
             $this->email->message('<p>Hallo kami dari BandungDesign akan mengonfirmasi anda dalam keikutsertaan event board game <b>'.$im.'</b> ini, <br/> Harap konfirmasi persetujuan kehadiran anda pada link ini : <a href="'.base_url().'user/event_baru">Saya akan Hadir!!!</a> event akan dimulai pada '.$it.'</p>');
         }
 
-
         //Cek pengiriman email
         if ($this->email->send()) {
-
-            //Akun ditambahkan ke database
-            // $this->mdataps->tambah_data($data);
-
             $this->session->set_flashdata('message','<div class="alert alert-success">
                 Email telah dikirim pada '.date('D-M-Y').' 
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -141,9 +136,6 @@ class User extends CI_Controller
             $this->session->set_flashdata('message', '<div class="alert alert-success">Pendaftaran Berhasil</div>');
             redirect('user/event_baru');
         }
-
-    
-
     }
 
     function event_baru()
@@ -236,7 +228,7 @@ class User extends CI_Controller
         $no_telp = $this->input->post('no_telp');
         $biaya = $this->input->post('biaya');
         $email_ps = $this->input->post('email_ps');
-        $tglsetuju = date('Y-m-d');
+        $tglsetuju = date('Y-m-d H:i:s');
 
         $data = array(
             'id_eventak' => $eventak,
@@ -442,7 +434,6 @@ class User extends CI_Controller
     {
         $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
 
-
         $this->load->view('templates/header', $data);
         $this->load->view('templates/sidebar', $data);
         $this->load->view('templates/topbar', $data);
@@ -456,11 +447,15 @@ class User extends CI_Controller
         $boardgame = $this->input->post('boardgame');
         $tanggal = $this->input->post('tanggal');
         $tempat = $this->input->post('tempat');
+        $harga = $this->input->post('harga');
+        $pengeluaran = $this->input->post('pengeluaran');
 
         $data = array(
             'boardgame' => $boardgame,
             'tanggal' => $tanggal,
             'tempat' => $tempat,
+            'harga_tiket' => $harga,
+            'pengeluaran' => $pengeluaran
         );
 
         $this->eventAk->tambah_dataak($data);
@@ -487,12 +482,15 @@ class User extends CI_Controller
         $boardgame = $this->input->post('boardgame');
         $tanggal = $this->input->post('tanggal');
         $tempat = $this->input->post('tempat');
+        $harga = $this->input->post('harga');
+        $pengeluaran = $this->input->post('pengeluaran');
 
         $data = array(
             'boardgame' => $boardgame,
             'tanggal' => $tanggal,
-            'tempat' => $tempat
-
+            'tempat' => $tempat,
+            'harga_tiket' => $harga,
+            'pengeluaran' => $pengeluaran
         );
 
 
@@ -506,46 +504,79 @@ class User extends CI_Controller
         redirect('user/akandatang');
     }
 
-    public function selesai_dataak($id)
+    public function selesai_event($id_boardgame)
     {
-        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
-        $data['event_ak'] = $this->db->get_where('event_ak', ['id' => $id])->row_array();
-
-
-        $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar', $data);
-        $this->load->view('templates/topbar', $data);
-        $this->load->view('user/selesaievent', $data);
-        $this->load->view('templates/footer');
-    }
-
-    public function selesai_dataak_action()
-    {
-        $id_boardgame = $this->input->post('id_boardgame');
-        $jl_partisipan = $this->input->post('jl_partisipan');
-        $harga_tiket = $this->input->post('harga_tiket');
-        $pd_masuk = ($jl_partisipan * $harga_tiket);
-        $pengeluaran = $this->input->post('pengeluaran');
-        $pd_bersih = ($pd_masuk - $pengeluaran);
-
-        $data = array(
-            'id_boardgame' => $id_boardgame,
-            'jl_partisipan' => $jl_partisipan,
-            'harga_tiket' => $harga_tiket,
-            'pd_masuk' => $pd_masuk,
-            'pengeluaran' => $pengeluaran,
-            'pd_bersih' => $pd_bersih
-
-        );
+        $eventak = $this->eventAk->tampil_data_ev($id_boardgame)->row();
+        $tiket = $eventak->harga_tiket;
+        $pengeluaran = $eventak->pengeluaran;
+        $jmlpeserta = $this->eventAk->jumlah_peserta($id_boardgame);
+        $jml = $jmlpeserta->jumlah;
+        $msk = $this->eventAk->pendapatan($id_boardgame);
+        $masuk = $msk->pd_masuk;
+        $bersih = $msk->pd_bersih;
+        
+        if($bersih < 0) {
+            $bersih = 0;
+        } 
 
         $data_status = array(
             'status' => 1,
         );
 
-        $this->eventAk->update_dataak($data_status, $id_boardgame);
-        $this->mdatapd->tambah_datapd($data);
-        redirect('user/datapendapatan');
+        $data_pendapatan = array(
+            'id_boardgame' => $id_boardgame,
+            'jl_partisipan' => $jml,
+            'harga_tiket' => $tiket,
+            'pd_masuk' => $masuk,
+            'pengeluaran' => $pengeluaran,
+            'pd_bersih' => $bersih
+        );
+
+        // die(var_dump($data_pendapatan));
+
+        $this->eventAk->update_dataak($data_status, $id_boardgame);  
+        $this->mdatapd->tambah_datapd($data_pendapatan);
+        redirect('user/datapendapatan'); 
     }
+
+    // public function selesai_dataak($id)
+    // {
+    //     $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
+    //     $data['event_ak'] = $this->db->get_where('event_ak', ['id' => $id])->row_array();
+
+    //     $this->load->view('templates/header', $data);
+    //     $this->load->view('templates/sidebar', $data);
+    //     $this->load->view('templates/topbar', $data);
+    //     $this->load->view('user/selesaievent', $data);
+    //     $this->load->view('templates/footer');
+    // }
+
+    // public function selesai_dataak_action()
+    // {
+    //     $id_boardgame = $this->input->post('id_boardgame');
+    //     $jl_partisipan = $this->input->post('jl_partisipan');
+    //     $harga_tiket = $this->input->post('harga_tiket');
+    //     $pd_masuk = ($jl_partisipan * $harga_tiket);
+    //     $pengeluaran = $this->input->post('pengeluaran');
+    //     $pd_bersih = ($pd_masuk - $pengeluaran);
+
+    //     $data = array(
+    //         'id_boardgame' => $id_boardgame,
+    //         'jl_partisipan' => $jl_partisipan,
+    //         'harga_tiket' => $harga_tiket,
+    //         'pd_masuk' => $pd_masuk,
+    //         'pengeluaran' => $pengeluaran,
+    //         'pd_bersih' => $pd_bersih
+    //     );
+
+    //     $data_status = array(
+    //         'status' => 1,
+    //     );
+
+    //     $this->eventAk->update_dataak($data_status, $id_boardgame);
+    //     $this->mdatapd->tambah_datapd($data);
+    //     redirect('user/datapendapatan');
+    // }
 
     ////////////////////////////////////// EVENT TERLAKSANA //////////////////////////////////////////////////
     public function terlaksana()

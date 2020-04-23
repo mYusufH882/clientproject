@@ -17,7 +17,14 @@
                 <label>Tempat pelaksanaan</label>
                 <input type="text" id="tempat" name="tempat" class="form-control" value="<?= $data['tempat'] ?>">
             </div>
-
+            <div class="form-group">
+                <label>Harga Tiket</label>
+                <input type="number" id="harga" name="harga" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Pengeluaran</label>
+                <input type="number" id="pengeluaran" name="pengeluaran" class="form-control" required>
+            </div>
 
             <button type="submit" class="btn btn-primary">Save Change </button>
 

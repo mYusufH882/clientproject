@@ -29,6 +29,11 @@ class mdataps extends CI_Model
         $tambah = $this->db->insert('peserta', $data);
     }
 
+    function tambah_riwayat_peserta($data)
+    {
+        $tambah = $this->db->insert('riwayat_peserta', $data);
+    }
+
     function edit_data($id)
     {
         return $this->db->get_where('peserta', ['id' => $id])->row_array();
@@ -54,9 +59,9 @@ class mdataps extends CI_Model
     function tampil_event($id)
     {
         $this->db->select('*');
-        $this->db->join('event_ak', 'event_ak.id = peserta.id_eventak');
-        $this->db->from('peserta');
-        $this->db->where(['peserta.id' => $id, 'peserta.disetujui' => 2]);
+        $this->db->join('event_ak', 'event_ak.id = riwayat_peserta.id_eventak');
+        $this->db->from('riwayat_peserta');
+        $this->db->where(['riwayat_peserta.id_peserta' => $id]);
         return $query = $this->db->get();
     }
 }

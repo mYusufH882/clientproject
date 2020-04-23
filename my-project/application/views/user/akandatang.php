@@ -34,6 +34,7 @@
                         <td>
                             <a href="<?= base_url(); ?>user/edit_dataak/<?= $p->id; ?>" class="badge badge-pill badge-primary">Edit</a>
                             <a href="<?= base_url(); ?>user/hapusdataak/<?= $p->id; ?>" class="badge badge-pill badge-danger">Hapus</a>
+                            <a href="<?= base_url(); ?>user/selesai_event/<?= $p->id; ?>" class="badge badge-pill badge-success">Selesai</a>
                         </td>
                     </tr>
 

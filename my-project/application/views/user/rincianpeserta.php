@@ -27,7 +27,7 @@
                     <th> Event Yang Pernah Diikuti </th>
                     <th> Tanggal Event </th>
                     <th> Tanggal Disetujui </th>
-                    <th> Action </th>
+                    <!-- <th> Action </th> -->
                 </tr>
             </thead>
             <tbody>
@@ -35,9 +35,8 @@
                     <tr>
                         <td><?= $e->boardgame ?></td>
                         <td><?= date('d-M-Y', strtotime($e->tanggal)) ?></td>                    
-                        <td><?= date('d-M-Y', strtotime($e->tgl_disetujui)) ?></td>
-                        <td>
-                        </td>
+                        <td><?= date('d-M-Y', strtotime($e->tgl_daftar)) ?></td>
+                        <!-- <td></td> -->
                     </tr>
                 <?php endforeach; ?>
             </tbody>

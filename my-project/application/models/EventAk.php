@@ -8,10 +8,33 @@ class eventAk extends CI_Model
         return $this->db->get('event_ak');
     }
 
+    function tampil_data_ev($id)
+    {
+        $this->db->where(['status' => 0, 'id' => $id]);
+        return $this->db->get('event_ak');
+    }
+
+    function pendapatan($id)
+    {
+        $query = $this->db->query("SELECT COUNT(DISTINCT(riwayat_peserta.id_peserta)) * event_ak.harga_tiket AS pd_masuk, (COUNT(DISTINCT(riwayat_peserta.id_peserta)) * event_ak.harga_tiket) - event_ak.pengeluaran AS pd_bersih FROM riwayat_peserta JOIN event_ak ON riwayat_peserta.id_eventak = event_ak.id WHERE event_ak.id = '".$id."'");
+
+        return $query->row();
+    }
+
     function tampil_data_ter()
     {
         $this->db->where('status', 1);
         return $this->db->get('event_ak');
+    }
+
+    function jumlah_peserta($id)
+    {
+        $this->db->select('COUNT(DISTINCT(id_peserta)) AS jumlah');
+        $this->db->from('riwayat_peserta');
+        $this->db->where('id_eventak', $id);
+        $query = $this->db->get();
+
+        return $query->row();
     }
 
     function reminder()
